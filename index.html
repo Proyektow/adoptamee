@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Adopta a un Colega 🎉 Edición Fiesta</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            nightDark: '#080811',
+            nightSurface: '#121324',
+            cyberCyan: '#00f7ff',
+            cyberViolet: '#7928ca',
+            cyberPink: '#ff007a',
+            cyberAmber: '#ffb703',
+            cyberEmerald: '#00f5a0',
+          },
+          boxShadow: {
+            'glow-cyan': '0 0 25px rgba(0, 247, 255, 0.35)',
+            'glow-pink': '0 0 25px rgba(255, 0, 122, 0.4)',
+            'glow-violet': '0 0 25px rgba(121, 40, 202, 0.45)',
+            'glow-amber': '0 0 20px rgba(255, 183, 3, 0.4)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800;900&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #171233 0%, #080811 75%);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .text-glow-cyan {
+      text-shadow: 0 0 12px rgba(0, 247, 255, 0.75);
+    }
+    .text-glow-amber {
+      text-shadow: 0 0 10px rgba(255, 183, 3, 0.7);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+
+<body class="text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-cyberPink selection:text-white">
+
+  <!-- Header / Barra superior -->
+  <header class="sticky top-0 z-40 bg-nightDark/85 backdrop-blur-lg border-b border-cyberViolet/30 px-4 py-3 flex items-center justify-between shadow-lg">
+    <div class="flex items-center space-x-2.5">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyberViolet via-cyberPink to-cyberCyan flex items-center justify-center shadow-glow-violet ring-1 ring-white/20">
+        <i class="fa-solid fa-champagne-glasses text-white text-base"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-black tracking-wider uppercase bg-clip-text text-transparent bg-gradient-to-r from-cyberCyan via-cyberPink to-cyberAmber">
+          Adopta Un Colega
+        </h1>
+        <p class="text-[10px] text-slate-400 font-semibold tracking-wide">Radar de Fiesta & Cupido Nocturno ⚡</p>
+      </div>
+    </div>
+
+    <!-- Botones de Acción Rápida -->
+    <div class="flex items-center space-x-2">
+      <button onclick="openEditModal()" class="w-9 h-9 rounded-xl bg-nightSurface border border-slate-700/80 hover:border-cyberCyan flex items-center justify-center text-slate-300 hover:text-cyberCyan active:scale-95 transition shadow-sm" title="Editar Perfil">
+        <i class="fa-solid fa-pen-to-square text-xs"></i>
+      </button>
+      <button onclick="openQRModal()" class="w-9 h-9 rounded-xl bg-gradient-to-r from-cyberPink to-cyberViolet flex items-center justify-center text-white shadow-glow-pink active:scale-95 transition" title="Compartir QR">
+        <i class="fa-solid fa-qrcode text-sm"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Pestañas de Amigos -->
+  <nav class="px-4 pt-3.5 pb-1 max-w-md mx-auto w-full">
+    <div id="tabsContainer" class="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
+      <!-- Inyectado por JS -->
+    </div>
+  </nav>
+
+  <!-- Contenedor Principal / Tarjeta del Colega -->
+  <main class="flex-1 max-w-md mx-auto w-full px-4 py-2 flex flex-col">
+    <div id="friendCard" class="bg-nightSurface/90 border border-cyberViolet/30 rounded-3xl p-4 shadow-2xl relative overflow-hidden transition-all duration-300 flex-1 flex flex-col">
+      
+      <!-- Luces ambientales de fondo -->
+      <div class="absolute -right-20 -top-16 w-52 h-52 bg-cyberPink/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-20 bottom-16 w-52 h-52 bg-cyberCyan/15 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Foto + Badge Disponibilidad -->
+      <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-900 shadow-inner group border border-slate-700/60">
+        <img id="cardPhoto" src="" alt="Foto Amigo" class="w-full h-full object-cover object-center transition duration-500 group-hover:scale-105">
+        
+        <!-- Badge de Disponibilidad dinámica -->
+        <div id="cardStatusBadge" class="absolute top-3 left-3 bg-nightDark/90 backdrop-blur-md border text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1.5 shadow-lg">
+          <span id="cardStatusDot" class="w-2 h-2 rounded-full animate-ping"></span>
+          <span id="cardStatusText">DISPONIBLE</span>
+        </div>
+
+        <!-- Etiqueta de Rol Fiesta -->
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-nightDark via-nightDark/75 to-transparent p-3 pt-8">
+          <span id="cardRole" class="inline-block bg-gradient-to-r from-cyberViolet to-cyberPink text-white font-extrabold text-[10px] px-2.5 py-0.5 rounded-lg tracking-wider uppercase shadow-md">
+            EL REY DEL CHUPITO
+          </span>
+          <div class="flex items-baseline justify-between mt-1">
+            <h2 id="cardName" class="text-2xl font-black text-white tracking-wide">Nombre, 24</h2>
+            <span id="cardBebida" class="text-xs text-cyberCyan font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-martini-glass-citrus"></i> Tequila Reposado
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barras de Métricas Cómicas -->
+      <div class="mt-3.5 grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-nightDark/70 p-2.5 rounded-2xl border border-slate-800/80">
+          <div class="flex justify-between text-slate-400 mb-1">
+            <span>Aguante nocturno</span>
+            <span id="cardResistencia" class="text-cyberCyan font-bold">95%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div id="barResistencia" class="bg-gradient-to-r from-cyberCyan to-cyberViolet h-2 rounded-full transition-all duration-500" style="width: 95%"></div>
+          </div>
+        </div>
+
+        <div class="bg-nightDark/70 p-2.5 rounded-2xl border border-slate-800/80">
+          <div class="flex justify-between text-slate-400 mb-1">
+            <span>Peligro al micrófono</span>
+            <span id="cardKaraoke" class="text-cyberPink font-bold">100%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div id="barKaraoke" class="bg-gradient-to-r from-cyberPink to-cyberAmber h-2 rounded-full transition-all duration-500" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Especialidades -->
+      <div class="mt-3">
+        <p class="text-[11px] font-bold text-cyberAmber uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+          <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+          <span>Especialidades</span>
+        </p>
+        <div id="cardTags" class="flex flex-wrap gap-1.5">
+          <!-- Tags dinámicos -->
+        </div>
+      </div>
+
+      <!-- Pros y Contras -->
+      <div class="mt-3 space-y-1.5 text-xs">
+        <div class="flex items-start gap-2 bg-emerald-950/25 border border-cyberEmerald/30 p-2.5 rounded-2xl">
+          <i class="fa-solid fa-circle-check text-cyberEmerald mt-0.5"></i>
+          <div>
+            <strong class="text-cyberEmerald font-bold">PRO:</strong>
+            <span id="cardPro" class="text-slate-200 ml-1">Sabe ligar con la barra para conseguir tapas y hielo gratis.</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-2 bg-rose-950/25 border border-cyberPink/30 p-2.5 rounded-2xl">
+          <i class="fa-solid fa-triangle-exclamation text-cyberPink mt-0.5"></i>
+          <div>
+            <strong class="text-cyberPink font-bold">CONTRA:</strong>
+            <span id="cardContra" class="text-slate-200 ml-1">A las 3:30 AM te convence de ir a un after en otra provincia.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción de Fiesta -->
+      <div class="mt-4 pt-3 border-t border-slate-800/90 grid grid-cols-2 gap-2.5">
+        <!-- Adoptar -->
+        <button onclick="actionAdopt()" class="flex items-center justify-center gap-2 bg-gradient-to-r from-cyberPink via-rose-500 to-cyberViolet hover:opacity-95 text-white font-extrabold py-3 px-3 rounded-2xl shadow-glow-pink active:scale-95 transition">
+          <i class="fa-solid fa-heart-pulse text-base"></i>
+          <span>¡ADOPTAR!</span>
+        </button>
+
+        <!-- Invitar Chupito -->
+        <button onclick="actionDrinkShot()" class="flex items-center justify-center gap-2 bg-nightDark hover:bg-slate-900 border border-cyberAmber/60 text-cyberAmber font-bold py-3 px-3 rounded-2xl shadow-glow-amber active:scale-95 transition">
+          <i class="fa-solid fa-fire-flame-curved text-base text-cyberAmber"></i>
+          <span>Invitar chupito</span>
+        </button>
+      </div>
+
+      <!-- Enlace a Instagram y Test Rápido -->
+      <div class="mt-2.5 grid grid-cols-2 gap-2.5">
+        <a id="cardInstaLink" href="#" target="_blank" class="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-950/60 to-pink-950/60 hover:border-cyberPink border border-cyberPink/30 text-white text-xs font-semibold py-2.5 px-2 rounded-xl transition">
+          <i class="fa-brands fa-instagram text-cyberPink text-base"></i>
+          <span id="cardInstaHandle">@instagram</span>
+        </a>
+
+        <button onclick="openCompatModal()" class="flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-950/60 to-indigo-950/60 border border-cyberCyan/50 text-cyberCyan hover:border-cyberCyan text-xs font-bold py-2.5 px-2 rounded-xl transition shadow-glow-cyan">
+          <i class="fa-solid fa-bolt text-cyberCyan"></i>
+          <span>Test Compatibilidad</span>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer con aviso de fiesta -->
+  <footer class="py-2 text-center text-[11px] text-slate-500 font-medium">
+    <p>Adopción 100% responsable. Bebe con moderación (o con ellos) 🍻</p>
+  </footer>
+
+  <!-- ================= MODAL: CÓDIGO QR PARA COMPARTIR ================= -->
+  <div id="qrModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-nightSurface border border-cyberCyan/40 rounded-3xl p-6 max-w-xs w-full text-center relative shadow-glow-cyan">
+      <button onclick="closeQRModal()" class="absolute top-3.5 right-3.5 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-slate-800/80 flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      
+      <div class="w-12 h-12 bg-cyberCyan/15 text-cyberCyan rounded-2xl flex items-center justify-center mx-auto mb-3 border border-cyberCyan/30">
+        <i class="fa-solid fa-qrcode text-2xl"></i>
+      </div>
+      <h3 class="text-xl font-black text-white">¡Escanea para Entrar!</h3>
+      <p class="text-xs text-slate-400 mt-1 mb-4">Pásalo en la barra o comparte el link directamente.</p>
+
+      <div class="bg-white p-3 rounded-2xl flex items-center justify-center mx-auto w-48 h-48 shadow-lg" id="qrcode"></div>
+
+      <div class="mt-4 flex flex-col gap-2">
+        <button onclick="copyCurrentURL()" class="w-full bg-nightDark hover:bg-slate-800 text-xs font-bold py-2.5 rounded-xl border border-slate-700 text-slate-200 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-link"></i>
+          <span id="copyBtnText">Copiar Enlace Web</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: TEST DE COMPATIBILIDAD (5 PREGUNTAS) ================= -->
+  <div id="compatModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-nightSurface border border-cyberCyan/40 rounded-3xl p-5 max-w-sm w-full relative shadow-glow-cyan my-auto">
+      <button onclick="closeCompatModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-slate-800/80 flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Pantalla del Test de Preguntas -->
+      <div id="compatQuizView">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyberPink animate-pulse"></span>
+          <span class="text-[11px] font-bold text-cyberPink uppercase tracking-widest" id="quizStepIndicator">Pregunta 1 de 5</span>
+        </div>
+        <h3 class="text-lg font-black text-white leading-tight" id="quizQuestionTitle">Pregunta de fiesta</h3>
+        <p class="text-[11px] text-slate-400 mb-4" id="quizQuestionSub">Elige la opción que mejor te defina:</p>
+
+        <!-- Contenedor de las 3 opciones -->
+        <div id="quizOptionsContainer" class="space-y-2.5 text-xs font-semibold">
+          <!-- Inyectado por JS -->
+        </div>
+
+        <div class="mt-4 flex items-center justify-between text-[11px] text-slate-500">
+          <span>Matchmaking de fiesta v2.0</span>
+          <div class="flex gap-1" id="quizDots">
+            <span class="w-2 h-2 rounded-full bg-cyberCyan"></span>
+            <span class="w-2 h-2 rounded-full bg-slate-700"></span>
+            <span class="w-2 h-2 rounded-full bg-slate-700"></span>
+            <span class="w-2 h-2 rounded-full bg-slate-700"></span>
+            <span class="w-2 h-2 rounded-full bg-slate-700"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pantalla de Resultado de Match -->
+      <div id="compatResultView" class="hidden text-center py-2">
+        <div class="w-14 h-14 bg-gradient-to-tr from-cyberPink to-cyberAmber rounded-full flex items-center justify-center mx-auto mb-3 shadow-glow-pink">
+          <i class="fa-solid fa-heart-circle-check text-2xl text-white"></i>
+        </div>
+        
+        <p class="text-[11px] font-bold text-cyberCyan uppercase tracking-widest mb-1">¡Vuestro Match Oficial es!</p>
+        <h3 id="resultWinnerName" class="text-2xl font-black text-white mb-0.5">Nombre Colega</h3>
+        <p id="resultWinnerRole" class="text-xs text-cyberPink font-semibold mb-3">Rol del colega</p>
+
+        <div class="bg-nightDark/80 border border-slate-800 rounded-2xl p-3 mb-4 text-left">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-slate-300 font-bold">Afinidad Fiestera</span>
+            <span id="resultAffinityPercent" class="text-cyberAmber font-black text-sm">96%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2 mb-2 overflow-hidden">
+            <div id="resultAffinityBar" class="bg-gradient-to-r from-cyberCyan via-cyberPink to-cyberAmber h-2 rounded-full" style="width: 96%"></div>
+          </div>
+          <p id="resultWinnerReason" class="text-xs text-slate-300 leading-relaxed">
+            Tenéis exactamente el mismo ritmo cardíaco a las 4 AM. Ni el portero os podrá separar.
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <button id="resultAdoptBtn" class="w-full bg-gradient-to-r from-cyberPink to-cyberViolet text-white font-black py-2.5 rounded-xl shadow-glow-pink text-xs active:scale-95 transition">
+            Ver su perfil ahora
+          </button>
+          <a id="resultInstaBtn" href="#" target="_blank" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-200 font-bold py-2.5 rounded-xl transition">
+            <i class="fa-brands fa-instagram text-pink-400"></i>
+            <span>Hablarle por Instagram</span>
+          </a>
+          <button onclick="startCompatibilityQuiz()" class="text-[11px] text-slate-400 hover:text-white pt-1">
+            <i class="fa-solid fa-rotate-right mr-1"></i> Repetir test
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL: MODO EDICIÓN COMPLETO ================= -->
+  <div id="editModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-nightSurface border border-cyberViolet/40 rounded-3xl p-5 max-w-sm w-full relative shadow-glow-violet max-h-[90vh] overflow-y-auto">
+      <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fa-solid fa-sliders text-cyberCyan text-xl"></i>
+        <h3 class="text-lg font-black text-white">Editar Perfil</h3>
+      </div>
+      <p class="text-xs text-slate-400 mb-3">Personaliza al colega seleccionado para la noche:</p>
+
+      <form id="editForm" onsubmit="saveProfileChanges(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Nombre y Edad</label>
+          <input type="text" id="editName" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyberCyan" required>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Disponibilidad</label>
+          <select id="editStatus" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyberCyan">
+            <option value="DISPONIBLE">🟢 DISPONIBLE</option>
+            <option value="CASI PILLADO/A">🟡 CASI PILLADO/A</option>
+            <option value="SOLO BUSCA FIESTA">🟣 SOLO BUSCA FIESTA</option>
+            <option value="BUSCANDO EL AMOR">❤️ BUSCANDO EL AMOR</option>
+            <option value="EN PELIGRO">🔥 EN PELIGRO</option>
+            <option value="SOLICITADO">⚡ SOLICITADO</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Rol / Mote festivo</label>
+          <input type="text" id="editRole" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyberPink" placeholder="Ej: Guardián de la barra" required>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Bebida / Chupito predilecto</label>
+          <input type="text" id="editBebida" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyberAmber" required>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Instagram (@)</label>
+          <input type="text" id="editInsta" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyberPink" placeholder="@usuario" required>
+        </div>
+
+        <!-- Edición de Especialidades -->
+        <div>
+          <label class="block text-cyberAmber font-bold mb-1">Especialidades (separadas por comas)</label>
+          <input type="text" id="editTags" class="w-full bg-nightDark border border-cyberAmber/50 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyberAmber" placeholder="🚗 Coche 5 plazas, 🕺 Rey del perreo, 🍕 Paga pizzas">
+          <p class="text-[10px] text-slate-500 mt-0.5">Escribe las etiquetas separadas con comas.</p>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Foto (Subir desde carrete o URL)</label>
+          <input type="file" id="editPhotoFile" accept="image/*" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2 text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-cyberViolet file:text-white file:text-xs">
+          <input type="text" id="editPhotoUrl" placeholder="https://url-de-tu-foto.jpg" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2 text-white mt-1.5 placeholder-slate-600">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">PRO</label>
+          <input type="text" id="editPro" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none" required>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">CONTRA</label>
+          <input type="text" id="editContra" class="w-full bg-nightDark border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none" required>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="submit" class="flex-1 bg-gradient-to-r from-cyberCyan via-cyberViolet to-cyberPink text-white font-extrabold py-2.5 rounded-xl shadow-glow-cyan">
+            Guardar Cambios
+          </button>
+          <button type="button" onclick="closeEditModal()" class="px-4 bg-slate-800 text-slate-300 rounded-xl font-semibold">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Flotante -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-nightSurface border border-cyberCyan text-white px-4 py-2.5 rounded-2xl shadow-glow-cyan text-xs font-bold flex items-center gap-2 transform translate-y-24 opacity-0 transition duration-300 pointer-events-none">
+    <i class="fa-solid fa-sparkles text-cyberCyan"></i>
+    <span id="toastMsg">Mensaje</span>
+  </div>
+
+  <script>
+    // ================= DATOS DE LOS 3 AMIGOS =================
+    let friendsData = [
+      {
+        id: 0,
+        name: "Carlos",
+        age: 24,
+        role: "El Chófer Designado & Diplomático",
+        drink: "Chupito sin alcohol o Tequila Suave",
+        photo: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=600&q=80",
+        status: "DISPONIBLE",
+        endurance: 92,
+        micDanger: 35,
+        tags: ["🚗 Coche 5 plazas", "🤝 Amigo de los porteros", "🧭 GPS Humano", "🍕 Paga las pizzas"],
+        pro: "Te devuelve a salvo a casa y nunca te deja tirado en la discoteca.",
+        contra: "A las 4:30 AM empieza a hacer sonar las llaves disimuladamente.",
+        instagram: "carlos_onparty"
+      },
+      {
+        id: 1,
+        name: "Dani",
+        age: 23,
+        role: "El Rey del Chupito & Tequila Master",
+        drink: "Jägermeister & Thunder Bitch",
+        photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
+        status: "SOLO BUSCA FIESTA",
+        endurance: 99,
+        micDanger: 95,
+        tags: ["⚡ Modo turbo activado", "🎯 Chupitos a traición", "🕺 Pasos prohibidos", "🎉 Alma del sarao"],
+        pro: "Consigue que cualquier garito vacío parezca un festival de música electrónica.",
+        contra: "Te mira fijamente y dice: '¿A que no hay huevos a pedir otra ronda?'.",
+        instagram: "dani_shots"
+      },
+      {
+        id: 2,
+        name: "Marcos",
+        age: 25,
+        role: "El Filósofo a las 4 AM",
+        drink: "Hierbas Ibicencas & Gin Tonic",
+        photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80",
+        status: "BUSCANDO EL AMOR",
+        endurance: 88,
+        micDanger: 80,
+        tags: ["🧠 Teorías profundas", "🚬 Amo de la zona fumadores", "🎶 Crítico musical", "💼 'Tengo un contacto'"],
+        pro: "Te resuelve una crisis existencial o una ruptura amorosa en 10 minutos.",
+        contra: "Acabas 45 minutos hablando con un desconocido sobre el origen del universo.",
+        instagram: "marcos_deepnight"
+      }
+    ];
+
+    // Cargar datos locales si existen
+    const saved = localStorage.getItem('adopta_amigos_data_v2');
+    if (saved) {
+      try {
+        friendsData = JSON.parse(saved);
+      } catch (e) {
+        console.error("Error al cargar localStorage", e);
+      }
+    }
+
+    let currentIndex = 0;
+    let qrGenerated = false;
+
+    // Configuración visual por estado
+    const statusStyles = {
+      'DISPONIBLE': { border: 'border-cyberEmerald/60', text: 'text-cyberEmerald', dot: 'bg-cyberEmerald' },
+      'CASI PILLADO/A': { border: 'border-cyberAmber/60', text: 'text-cyberAmber', dot: 'bg-cyberAmber' },
+      'SOLO BUSCA FIESTA': { border: 'border-cyberViolet/60', text: 'text-cyberViolet', dot: 'bg-cyberViolet' },
+      'BUSCANDO EL AMOR': { border: 'border-cyberPink/60', text: 'text-cyberPink', dot: 'bg-cyberPink' },
+      'EN PELIGRO': { border: 'border-rose-500/60', text: 'text-rose-400', dot: 'bg-rose-500' },
+      'SOLICITADO': { border: 'border-cyberCyan/60', text: 'text-cyberCyan', dot: 'bg-cyberCyan' }
+    };
+
+    // ================= RENDERIZADO =================
+    function renderTabs() {
+      const container = document.getElementById('tabsContainer');
+      container.innerHTML = '';
+
+      friendsData.forEach((friend, idx) => {
+        const isActive = idx === currentIndex;
+        const btn = document.createElement('button');
+        btn.className = `flex-1 min-w-[105px] py-2 px-3 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 border ${
+          isActive 
+            ? 'bg-gradient-to-r from-cyberCyan via-cyberViolet to-cyberPink text-white border-transparent shadow-glow-cyan scale-100' 
+            : 'bg-nightSurface/90 text-slate-400 border-slate-800 hover:text-white'
+        }`;
+        btn.onclick = () => selectFriend(idx);
+        btn.innerHTML = `
+          <span class="w-2 h-2 rounded-full ${isActive ? 'bg-cyberCyan animate-ping' : 'bg-slate-600'}"></span>
+          <span>${friend.name}</span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCard(idx) {
+      const f = friendsData[idx];
+      const card = document.getElementById('friendCard');
+
+      card.classList.add('opacity-40', 'scale-95');
+      setTimeout(() => {
+        document.getElementById('cardPhoto').src = f.photo;
+
+        // Renderizado del Status Badge
+        const stStyle = statusStyles[f.status] || statusStyles['DISPONIBLE'];
+        const badge = document.getElementById('cardStatusBadge');
+        badge.className = `absolute top-3 left-3 bg-nightDark/90 backdrop-blur-md border ${stStyle.border} ${stStyle.text} text-[11px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5 shadow-lg`;
+        document.getElementById('cardStatusDot').className = `w-2 h-2 rounded-full animate-ping ${stStyle.dot}`;
+        document.getElementById('cardStatusText').textContent = f.status;
+
+        document.getElementById('cardRole').textContent = f.role;
+        document.getElementById('cardName').textContent = `${f.name}, ${f.age}`;
+        document.getElementById('cardBebida').innerHTML = `<i class="fa-solid fa-martini-glass-citrus"></i> ${f.drink}`;
+
+        // Barras
+        document.getElementById('cardResistencia').textContent = `${f.endurance}%`;
+        document.getElementById('barResistencia').style.width = `${f.endurance}%`;
+        document.getElementById('cardKaraoke').textContent = `${f.micDanger}%`;
+        document.getElementById('barKaraoke').style.width = `${f.micDanger}%`;
+
+        // Especialidades (Tags)
+        const tagsContainer = document.getElementById('cardTags');
+        tagsContainer.innerHTML = '';
+        f.tags.forEach(tag => {
+          const t = document.createElement('span');
+          t.className = 'text-[10px] font-semibold bg-nightDark border border-cyberViolet/30 px-2.5 py-1 rounded-xl text-slate-200 shadow-sm';
+          t.textContent = tag;
+          tagsContainer.appendChild(t);
+        });
+
+        // Pros y contras
+        document.getElementById('cardPro').textContent = f.pro;
+        document.getElementById('cardContra').textContent = f.contra;
+
+        // Instagram
+        const instaClean = f.instagram.replace('@', '');
+        document.getElementById('cardInstaLink').href = `https://instagram.com/${instaClean}`;
+        document.getElementById('cardInstaHandle').textContent = `@${instaClean}`;
+
+        card.classList.remove('opacity-40', 'scale-95');
+      }, 150);
+    }
+
+    function selectFriend(idx) {
+      currentIndex = idx;
+      renderTabs();
+      renderCard(idx);
+    }
+
+    // ================= INTERACCIONES DE FIESTA =================
+    function actionAdopt() {
+      const friend = friendsData[currentIndex];
+      confetti({
+        particleCount: 110,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+      showToast(`🎉 ¡Has adoptado a ${friend.name}! Tienes custodia compartida hasta el desayuno.`);
+    }
+
+    function actionDrinkShot() {
+      const friend = friendsData[currentIndex];
+      const chupitos = [
+        "un chupito helado de Jägermeister 🦌",
+        "un trallazo de Tequila con sal y limón 🍋",
+        "un Thunder Bitch bien picante ⚡",
+        "un chupito de Piruleta dulce 🍭",
+        "un trago de Absenta letal 🔥"
+      ];
+      const randomShot = chupitos[Math.floor(Math.random() * chupitos.length)];
+      confetti({
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.7 }
+      });
+      showToast(`🔥 ¡Marchando ${randomShot} para ${friend.name}! Que empiece el espectáculo.`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toastMsg');
+      text.textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+
+    // ================= CÓDIGO QR =================
+    function openQRModal() {
+      const modal = document.getElementById('qrModal');
+      modal.classList.remove('hidden');
+
+      if (!qrGenerated) {
+        new QRCode(document.getElementById("qrcode"), {
+          text: window.location.href,
+          width: 170,
+          height: 170,
+          colorDark : "#080811",
+          colorLight : "#ffffff",
+          correctLevel : QRCode.CorrectLevel.H
+        });
+        qrGenerated = true;
+      }
+    }
+
+    function closeQRModal() {
+      document.getElementById('qrModal').classList.add('hidden');
+    }
+
+    function copyCurrentURL() {
+      const dummy = document.createElement('input');
+      document.body.appendChild(dummy);
+      dummy.value = window.location.href;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+
+      const btnText = document.getElementById('copyBtnText');
+      btnText.textContent = "¡Enlace Copiado!";
+      setTimeout(() => {
+        btnText.textContent = "Copiar Enlace Web";
+      }, 2000);
+      showToast("📋 Enlace copiado al portapapeles.");
+    }
+
+    // ================= TEST DE COMPATIBILIDAD (5 PREGUNTAS) =================
+    const quizQuestions = [
+      {
+        question: "¿Qué música te activa el modo fiesta?",
+        sub: "Define tu banda sonora ideal de la noche:",
+        options: [
+          { text: "🚗 Pop español clásico y temazos nostálgicos para cantar a pulmón", scores: [3, 0, 1] },
+          { text: "🪩 Reggaeton duro, techno o trap para perrear hasta el suelo", scores: [0, 3, 0] },
+          { text: "🎧 Indie rock, vinilos retro o temas con solos de guitarra de 6 minutos", scores: [1, 0, 3] }
+        ]
+      },
+      {
+        question: "¿Cuál es tu pedido reglamentario en la barra?",
+        sub: "Dime qué bebes y te diré con quién vas:",
+        options: [
+          { text: "🍺 Cerveza fría, refresco o algo que no me reviente el estómago", scores: [3, 0, 1] },
+          { text: "🔥 Ronda de chupitos de Tequila o Jäger para todo el grupo", scores: [0, 3, 0] },
+          { text: "🍸 Gin Tonic en copa de balón o cóctel con nombre impronunciable", scores: [0, 1, 3] }
+        ]
+      },
+      {
+        question: "Son las 4:30 AM y cierran el local, ¿cuál es tu jugada?",
+        sub: "Momento decisivo de la noche:",
+        options: [
+          { text: "🍕 Recoger al rebaño, ir a por un kebab o pizza y a la cama", scores: [3, 0, 0] },
+          { text: "⚡ Preguntarle a desconocidos '¿Dónde está el after?' y no parar", scores: [0, 3, 0] },
+          { text: "🚬 Sentarme en un banco o portal a arreglar la geopolítica mundial", scores: [0, 0, 3] }
+        ]
+      },
+      {
+        question: "Si te pierdes de tu grupo en la discoteca, tú...",
+        sub: "Protocolo de emergencia fiestero:",
+        options: [
+          { text: "📍 Mando ubicación en tiempo real y busco el punto de encuentro fijado", scores: [3, 0, 1] },
+          { text: "🕺 Hago 4 amigos nuevos en el baño y me subo a la tarima", scores: [0, 3, 0] },
+          { text: "💬 Me pongo a charlar con los fumadores o con el portero", scores: [0, 1, 3] }
+        ]
+      },
+      {
+        question: "Al día siguiente con la resaca, ¿qué plan te cura?",
+        sub: "La prueba de fuego post-fiesta:",
+        options: [
+          { text: "🚗 Comida casera, siesta y comentar quién hizo el ridículo", scores: [3, 0, 1] },
+          { text: "🍻 'La cerveza del día después' porque un clavo saca otro clavo", scores: [0, 3, 0] },
+          { text: "☕ Café doble, peli densa y debate reflexivo sobre nuestras vidas", scores: [0, 0, 3] }
+        ]
+      }
+    ];
+
+    let quizCurrentStep = 0;
+    let quizScores = [0, 0, 0]; // [Carlos, Dani, Marcos]
+
+    function openCompatModal() {
+      document.getElementById('compatModal').classList.remove('hidden');
+      startCompatibilityQuiz();
+    }
+
+    function closeCompatModal() {
+      document.getElementById('compatModal').classList.add('hidden');
+    }
+
+    function startCompatibilityQuiz() {
+      quizCurrentStep = 0;
+      quizScores = [0, 0, 0];
+      document.getElementById('compatQuizView').classList.remove('hidden');
+      document.getElementById('compatResultView').classList.add('hidden');
+      renderQuizStep();
+    }
+
+    function renderQuizStep() {
+      const q = quizQuestions[quizCurrentStep];
+      document.getElementById('quizStepIndicator').textContent = `Pregunta ${quizCurrentStep + 1} de 5`;
+      document.getElementById('quizQuestionTitle').textContent = q.question;
+      document.getElementById('quizQuestionSub').textContent = q.sub;
+
+      // Actualizar puntos de progreso
+      const dotsContainer = document.getElementById('quizDots');
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < 5; i++) {
+        const dot = document.createElement('span');
+        dot.className = `w-2 h-2 rounded-full ${i === quizCurrentStep ? 'bg-cyberCyan' : (i < quizCurrentStep ? 'bg-cyberPink' : 'bg-slate-700')}`;
+        dotsContainer.appendChild(dot);
+      }
+
+      // Renderizar opciones
+      const optionsBox = document.getElementById('quizOptionsContainer');
+      optionsBox.innerHTML = '';
+
+      q.options.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-3 rounded-2xl bg-nightDark/90 border border-slate-700/80 hover:border-cyberCyan text-slate-200 transition active:scale-[0.98] leading-snug flex items-center justify-between group";
+        btn.innerHTML = `
+          <span>${opt.text}</span>
+          <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-cyberCyan ml-2 transition"></i>
+        `;
+        btn.onclick = () => handleQuizAnswer(opt.scores);
+        optionsBox.appendChild(btn);
+      });
+    }
+
+    function handleQuizAnswer(pointScores) {
+      for (let i = 0; i < 3; i++) {
+        quizScores[i] += pointScores[i];
+      }
+
+      quizCurrentStep++;
+      if (quizCurrentStep < quizQuestions.length) {
+        renderQuizStep();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function finishQuiz() {
+      document.getElementById('compatQuizView').classList.add('hidden');
+      const resultView = document.getElementById('compatResultView');
+      resultView.classList.remove('hidden');
+
+      // Determinar ganador
+      let maxScore = -1;
+      let winnerIdx = 0;
+      quizScores.forEach((score, idx) => {
+        if (score > maxScore) {
+          maxScore = score;
+          winnerIdx = idx;
+        }
+      });
+
+      const winner = friendsData[winnerIdx];
+      const maxPossible = 15;
+      const affinity = Math.min(99, Math.max(82, Math.round((maxScore / maxPossible) * 100) + Math.floor(Math.random() * 8)));
+
+      const reasons = [
+        `Vuestra química con **${winner.name}** es absoluta: tenéis la misma sincronización para pedir rondas y nunca os perderéis el uno al otro.`,
+        `¡Alerta de Match! Con **${winner.name}** la noche está garantizada hasta el amanecer sin momentos aburridos.`,
+        `Tenéis el mismo humor y la misma resistencia festiva. Sois el dúo dinámico que la noche estaba esperando.`
+      ];
+
+      document.getElementById('resultWinnerName').textContent = `${winner.name}, ${winner.age}`;
+      document.getElementById('resultWinnerRole').textContent = winner.role;
+      document.getElementById('resultAffinityPercent').textContent = `${affinity}%`;
+      document.getElementById('resultAffinityBar').style.width = `${affinity}%`;
+      document.getElementById('resultWinnerReason').innerHTML = reasons[winnerIdx];
+
+      const cleanInsta = winner.instagram.replace('@', '');
+      document.getElementById('resultInstaBtn').href = `https://instagram.com/${cleanInsta}`;
+
+      document.getElementById('resultAdoptBtn').onclick = () => {
+        selectFriend(winnerIdx);
+        closeCompatModal();
+        actionAdopt();
+      };
+
+      confetti({
+        particleCount: 120,
+        spread: 90,
+        origin: { y: 0.55 }
+      });
+    }
+
+    // ================= MODO EDICIÓN =================
+    function openEditModal() {
+      const f = friendsData[currentIndex];
+      document.getElementById('editName').value = `${f.name}, ${f.age}`;
+      document.getElementById('editStatus').value = f.status;
+      document.getElementById('editRole').value = f.role;
+      document.getElementById('editBebida').value = f.drink;
+      document.getElementById('editInsta').value = f.instagram;
+      document.getElementById('editTags').value = f.tags.join(', ');
+      document.getElementById('editPro').value = f.pro;
+      document.getElementById('editContra').value = f.contra;
+      document.getElementById('editPhotoUrl').value = f.photo;
+      document.getElementById('editPhotoFile').value = '';
+
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.add('hidden');
+    }
+
+    function saveProfileChanges(e) {
+      e.preventDefault();
+      const f = friendsData[currentIndex];
+
+      const nameAge = document.getElementById('editName').value.split(',');
+      f.name = nameAge[0].trim();
+      if (nameAge[1]) {
+        f.age = parseInt(nameAge[1].trim()) || f.age;
+      }
+
+      f.status = document.getElementById('editStatus').value;
+      f.role = document.getElementById('editRole').value;
+      f.drink = document.getElementById('editBebida').value;
+      f.instagram = document.getElementById('editInsta').value.replace('@', '');
+
+      // Guardar tags / especialidades
+      const rawTags = document.getElementById('editTags').value;
+      if (rawTags.trim()) {
+        f.tags = rawTags.split(',').map(t => t.trim()).filter(t => t.length > 0);
+      }
+
+      f.pro = document.getElementById('editPro').value;
+      f.contra = document.getElementById('editContra').value;
+
+      const fileInput = document.getElementById('editPhotoFile');
+      const urlInput = document.getElementById('editPhotoUrl').value;
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          f.photo = evt.target.result;
+          finalizeSave();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else if (urlInput.trim() !== '') {
+        f.photo = urlInput.trim();
+        finalizeSave();
+      } else {
+        finalizeSave();
+      }
+    }
+
+    function finalizeSave() {
+      localStorage.setItem('adopta_amigos_data_v2', JSON.stringify(friendsData));
+      renderTabs();
+      renderCard(currentIndex);
+      closeEditModal();
+      showToast("💾 ¡Perfil y especialidades guardados!");
+    }
+
+    // Soporte para gestos táctiles (Swipe)
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const cardEl = document.getElementById('friendCard');
+
+    cardEl.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    cardEl.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 55) {
+        if (diff < 0) {
+          currentIndex = (currentIndex + 1) % friendsData.length;
+        } else {
+          currentIndex = (currentIndex - 1 + friendsData.length) % friendsData.length;
+        }
+        selectFriend(currentIndex);
+      }
+    }
+
+    // Inicialización
+    window.onload = function() {
+      renderTabs();
+      renderCard(0);
+    };
+  </script>
+</body>
+</html>
